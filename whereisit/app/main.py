@@ -47,9 +47,6 @@ async def startup():
     except Exception as e:
         logger.error(f"Error listing directories: {e}")
 
-    # Ensure photos directory exists
-    os.makedirs("/data/photos", exist_ok=True)
-
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
         
@@ -83,6 +80,7 @@ else:
     logger.warning("frontend/dist/assets NOT FOUND")
 
 # Mount photos directory
+os.makedirs("/data/photos", exist_ok=True)
 app.mount("/api/photos", StaticFiles(directory="/data/photos"), name="photos")
 
 # Catch-all to serve index.html for SPA (excluding API)
