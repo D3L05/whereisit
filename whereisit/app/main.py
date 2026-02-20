@@ -94,6 +94,10 @@ async def catch_all(full_path: str):
     
     # Serve index.html
     if os.path.exists("frontend/dist/index.html"):
-        return FileResponse("frontend/dist/index.html")
+        response = FileResponse("frontend/dist/index.html")
+        response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+        response.headers["Pragma"] = "no-cache"
+        response.headers["Expires"] = "0"
+        return response
     return {"error": "Frontend not found"}
 
