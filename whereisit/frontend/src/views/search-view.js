@@ -49,12 +49,20 @@ export class SearchView extends LitElement {
     async connectedCallback() {
         super.connectedCallback();
         try {
-            const response = await fetch(window.AppRouter ? window.AppRouter.urlForPath(`/api/categories`) : `api/categories`);
+            // Avoid urlForPath stripping unknown routes.
+            const apiPath = window.AppRouter ? window.AppRouter.urlForPath('/') : '/';
+            // strip trailing slash if exists to safely append
+            const base = apiPath.endsWith('/') ? apiPath.slice(0, -1) : apiPath;
+
+            const response = await fetch(`${base}/api/categories`);
             if (response.ok) {
                 this.categories = await response.json();
+                this.requestUpdate(); // Force lit to notice the array change
+            } else {
+                console.error("Categories fetch returned non-ok status:", response.status);
             }
         } catch (e) {
-            console.error("Failed to load categories", e);
+            console.error("Failed to load categories in search view", e);
         }
     }
 
