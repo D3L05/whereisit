@@ -1,6 +1,10 @@
-from fastapi import APIRouter, Depends, HTTPException, Response
+from fastapi import APIRouter, Depends, HTTPException, Response, UploadFile, File
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List
+import uuid
+import os
+from PIL import Image
+from io import BytesIO
 from .. import crud, schemas, database, utils
 
 router = APIRouter()
@@ -102,6 +106,49 @@ async def delete_item(item_id: int, db: AsyncSession = Depends(database.get_db))
     if not db_item:
         raise HTTPException(status_code=404, detail="Item not found")
     return {"message": "Item deleted successfully"}
+
+@router.post("/items/{item_id}/photo", response_model=schemas.Item)
+async def upload_item_photo(item_id: int, file: UploadFile = File(...), db: AsyncSession = Depends(database.get_db)):
+    from sqlalchemy.future import select
+    from .. import models
+    
+    # Check if item exists
+    result = await db.execute(select(models.Item).where(models.Item.id == item_id))
+    db_item = result.scalar_one_or_none()
+    if not db_item:
+        raise HTTPException(status_code=404, detail="Item not found")
+        
+    if not file.content_type.startswith("image/"):
+        raise HTTPException(status_code=400, detail="File must be an image")
+
+    try:
+        # Read the file
+        contents = await file.read()
+        image = Image.open(BytesIO(contents))
+        
+        # Convert to RGB to remove alpha channel since we are saving as JPEG
+        if image.mode in ("RGBA", "P"):
+            image = image.convert("RGB")
+            
+        # Resize image to save space, preserving aspect ratio
+        image.thumbnail((800, 800))
+        
+        # Generate unique filename
+        filename = f"{uuid.uuid4()}.jpg"
+        filepath = os.path.join("/data/photos", filename)
+        
+        # Save compressed image
+        image.save(filepath, format="JPEG", quality=85)
+        
+        # Update database with relative URL path
+        # Assuming app is mounted to serve /data/photos at /api/photos
+        photo_url = f"/api/photos/{filename}"
+        
+        update_data = schemas.ItemUpdate(photo_path=photo_url)
+        return await crud.update_item(db, item_id=item_id, item_update=update_data)
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to process image: {str(e)}")
 
 @router.get("/search")
 async def search(q: str, db: AsyncSession = Depends(database.get_db)):

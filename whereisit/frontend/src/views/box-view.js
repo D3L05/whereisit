@@ -112,10 +112,17 @@ export class BoxView extends LitElement {
 
       <mwc-list>
         ${this.box.items.map(item => html`
-            <mwc-list-item twoline graphic="icon" hasMeta>
+            <mwc-list-item twoline graphic="medium" hasMeta>
                 <span>${item.name}</span>
-                <span slot="secondary">${item.description || ''}</span>
-                <mwc-icon slot="graphic">category</mwc-icon>
+                <span slot="secondary">
+                    ${item.description || ''} 
+                    ${item.category ? html`<span style="margin-left: 8px; font-style: italic; color: var(--mdc-theme-primary);">[${item.category}]</span>` : ''}
+                </span>
+                
+                ${item.photo_path
+                ? html`<img slot="graphic" src="${window.AppRouter ? window.AppRouter.urlForPath(item.photo_path) : item.photo_path}" style="width: 56px; height: 56px; object-fit: cover; border-radius: 4px;" />`
+                : html`<mwc-icon slot="graphic">category</mwc-icon>`}
+
                 <div slot="meta" class="item-meta">
                     <span style="margin-right:8px;">x${item.quantity}</span>
                     <mwc-icon-button icon="edit" @click=${(e) => this._openEditItemDialog(e, item)} style="--mdc-icon-size: 20px; color: gray;"></mwc-icon-button>

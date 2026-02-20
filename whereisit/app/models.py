@@ -30,6 +30,8 @@ class Item(Base):
     name = Column(String, index=True)
     description = Column(String, nullable=True)
     quantity = Column(Integer, default=1)
+    category = Column(String, index=True, nullable=True)
+    photo_path = Column(String, nullable=True)
     box_id = Column(Integer, ForeignKey("storage_boxes.id"))
 
     box = relationship("StorageBox", back_populates="items")

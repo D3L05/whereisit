@@ -5,8 +5,8 @@ from .database import engine, Base
 from . import models
 from .api import endpoints
 import os
-
 import logging
+from sqlalchemy import text
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -47,8 +47,26 @@ async def startup():
     except Exception as e:
         logger.error(f"Error listing directories: {e}")
 
+    # Ensure photos directory exists
+    os.makedirs("/data/photos", exist_ok=True)
+
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+        
+        # SQLite migration to add new columns if they don't exist
+        try:
+            await conn.execute(text("ALTER TABLE items ADD COLUMN category VARCHAR;"))
+            logger.info("Added category column to items table.")
+        except Exception as e:
+            if "duplicate column name" not in str(e).lower():
+                logger.warning(f"Failed to add category column (might already exist): {e}")
+                
+        try:
+            await conn.execute(text("ALTER TABLE items ADD COLUMN photo_path VARCHAR;"))
+            logger.info("Added photo_path column to items table.")
+        except Exception as e:
+            if "duplicate column name" not in str(e).lower():
+                logger.warning(f"Failed to add photo_path column (might already exist): {e}")
 
 @app.get("/api/health")
 async def health_check():
@@ -57,13 +75,15 @@ async def health_check():
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
-# Mount assets explicitly
-# Mount assets explicitly
+# Mount assets implicitly
 if os.path.exists("frontend/dist/assets"):
     logger.info("Mounting /assets to frontend/dist/assets")
     app.mount("/assets", StaticFiles(directory="frontend/dist/assets"), name="assets")
 else:
     logger.warning("frontend/dist/assets NOT FOUND")
+
+# Mount photos directory
+app.mount("/api/photos", StaticFiles(directory="/data/photos"), name="photos")
 
 # Catch-all to serve index.html for SPA (excluding API)
 @app.get("/{full_path:path}")

@@ -110,6 +110,8 @@ async def update_item(db: AsyncSession, item_id: int, item_update: schemas.ItemU
     return db_item
 
 async def search_storage(db: AsyncSession, query: str):
+    from sqlalchemy import or_
+    
     # Search boxes
     boxes = await db.execute(
         select(models.StorageBox)
@@ -119,7 +121,16 @@ async def search_storage(db: AsyncSession, query: str):
     boxes = boxes.scalars().all()
     
     # Search items
-    items = await db.execute(select(models.Item).options(selectinload(models.Item.box)).where(models.Item.name.ilike(f"%{query}%")))
+    items = await db.execute(
+        select(models.Item)
+        .options(selectinload(models.Item.box))
+        .where(
+            or_(
+                models.Item.name.ilike(f"%{query}%"),
+                models.Item.category.ilike(f"%{query}%")
+            )
+        )
+    )
     items = items.scalars().all()
     
     return {"boxes": boxes, "items": items}

@@ -42,10 +42,15 @@ export class SearchView extends LitElement {
 
             <mwc-list-item noninteractive><b>Items</b></mwc-list-item>
             ${this.results.items.map(item => html`
-                <mwc-list-item twoline graphic="icon" @click=${() => this._navigateToBox(item.box_id)}>
+                <mwc-list-item twoline graphic="medium" @click=${() => this._navigateToBox(item.box_id)}>
                     <span>${item.name}</span>
-                    <span slot="secondary">In: ${item.box ? item.box.name : 'Unknown Box'}</span>
-                    <mwc-icon slot="graphic">category</mwc-icon>
+                    <span slot="secondary">
+                        In: ${item.box ? item.box.name : 'Unknown Box'} 
+                        ${item.category ? html`<span style="margin-left: 8px; font-style: italic; color: var(--mdc-theme-primary);">[${item.category}]</span>` : ''}
+                    </span>
+                    ${item.photo_path
+                ? html`<img slot="graphic" src="${window.AppRouter ? window.AppRouter.urlForPath(item.photo_path) : item.photo_path}" style="width: 56px; height: 56px; object-fit: cover; border-radius: 4px;" />`
+                : html`<mwc-icon slot="graphic">category</mwc-icon>`}
                 </mwc-list-item>
             `)}
              ${this.results.items.length === 0 ? html`<mwc-list-item noninteractive>No items found</mwc-list-item>` : ''}

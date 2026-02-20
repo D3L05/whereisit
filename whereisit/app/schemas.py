@@ -5,6 +5,8 @@ class ItemBase(BaseModel):
     name: str
     description: Optional[str] = None
     quantity: int = 1
+    category: Optional[str] = None
+    photo_path: Optional[str] = None
 
 class ItemCreate(ItemBase):
     pass
@@ -71,3 +73,5 @@ class ItemUpdate(BaseModel):
     name: Optional[str] = None
     description: Optional[str] = None
     quantity: Optional[int] = None
+    category: Optional[str] = None
+    photo_path: Optional[str] = None
