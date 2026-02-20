@@ -181,8 +181,37 @@ export class BoxView extends LitElement {
         this.shadowRoot.querySelector('edit-box-dialog').show(this.box);
     }
 
+    _openItemDetail(e, item) {
+        if (e && e.stopPropagation) {
+            e.stopPropagation();
+        }
+
+        // Find the global dialog injected by the main app
+        const app = document.querySelector('where-is-it-app');
+        if (!app) {
+            console.error("Could not find where-is-it-app");
+            return;
+        }
+
+        const dialog = app.shadowRoot.getElementById('globalItemDetailDialog');
+        if (dialog) {
+            dialog.show({ ...item, box: this.box });
+
+            // Listen for the edit request from the detail dialog
+            const editHandler = (ev) => {
+                dialog.removeEventListener('edit-item-requested', editHandler);
+                this._openEditItemDialog(null, ev.detail.item);
+            };
+            dialog.addEventListener('edit-item-requested', editHandler);
+        } else {
+            console.error("Could not find globalItemDetailDialog");
+        }
+    }
+
     _openEditItemDialog(e, item) {
-        e.stopPropagation();
+        if (e && e.stopPropagation) {
+            e.stopPropagation();
+        }
         this.shadowRoot.querySelector('edit-item-dialog').show(item);
     }
 
