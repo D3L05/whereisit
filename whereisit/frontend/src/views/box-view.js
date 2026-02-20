@@ -268,43 +268,51 @@ export class BoxView extends LitElement {
                         }
                         .label-container {
                             border: 2px solid #000;
-                            padding: 20px;
+                            padding: 24px 16px;
                             border-radius: 12px;
-                            width: 300px;
-                        }
-                        .unit-name {
-                            font-size: 14px;
-                            color: #666;
-                            margin-bottom: 4px;
-                            text-transform: uppercase;
-                            letter-spacing: 1px;
-                        }
-                        .box-name {
-                            font-size: 28px;
-                            font-weight: bold;
-                            margin-bottom: 16px;
+                            width: 320px;
+                            display: flex;
+                            flex-direction: column;
+                            align-items: center;
                         }
                         .qr-img {
-                            width: 150px;
-                            height: 150px;
+                            width: 240px;
+                            height: 240px;
+                            margin-bottom: 16px;
+                        }
+                        .box-name {
+                            font-size: 32px;
+                            font-weight: 900;
+                            line-height: 1.1;
+                            margin-bottom: 8px;
+                            color: #000;
+                        }
+                        .unit-name {
+                            font-size: 16px;
+                            font-weight: 500;
+                            color: #444;
+                            margin-bottom: 8px;
                         }
                         .slug {
-                            margin-top: 12px;
+                            margin-top: 8px;
                             font-family: monospace;
-                            font-size: 12px;
-                            color: #888;
+                            font-size: 14px;
+                            color: #666;
+                            background: #f5f5f5;
+                            padding: 4px 8px;
+                            border-radius: 4px;
                         }
                         @media print {
                             body { width: 100%; height: auto; }
-                            .label-container { border: none; }
+                            .label-container { border: none; padding: 0; }
                         }
                     </style>
                 </head>
                 <body>
                     <div class="label-container">
-                        <div class="unit-name">${unitName}</div>
-                        <div class="box-name">${this.box.name}</div>
                         <img src="${qrUrl}" class="qr-img" />
+                        <div class="box-name">${this.box.name}</div>
+                        <div class="unit-name">${unitName}</div>
                         <div class="slug">ID: ${this.box.slug}</div>
                     </div>
                     <script>
