@@ -17,45 +17,63 @@ export class HomeView extends LitElement {
     }
     .search-container {
       padding: 16px;
-      padding-bottom: 0;
+      padding-bottom: 8px;
     }
     mwc-textfield {
       width: 100%;
+      --mdc-shape-small: 8px; /* Slightly rounded corners */
     }
     .search-results {
-      margin: 16px;
-      margin-top: 0;
+      margin: 8px 16px 16px 16px;
       background: white;
-      border-radius: 8px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08); /* Premium soft shadow */
       overflow: hidden;
+      border: 1px solid rgba(0,0,0,0.05);
     }
     .category-chips {
       display: flex;
-      gap: 8px;
+      gap: 10px;
       overflow-x: auto;
-      padding: 0 16px 16px 16px;
+      padding: 4px 16px 16px 16px;
+      scrollbar-width: none; /* Hide scrollbar for cleaner look */
+    }
+    .category-chips::-webkit-scrollbar {
+      display: none;
     }
     .chip {
-      background: #e0e0e0;
-      border: none;
-      border-radius: 16px;
-      padding: 6px 12px;
+      background: #f0f2f5; /* Light grey modern background */
+      border: 1px solid transparent;
+      border-radius: 20px;
+      padding: 8px 16px;
       font-size: 0.875rem;
+      font-weight: 500;
+      color: #444;
       cursor: pointer;
       white-space: nowrap;
       font-family: Roboto, sans-serif;
+      transition: all 0.2s ease;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    }
+    .chip:hover {
+      background: #e4e6e9;
+      transform: translateY(-1px);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
     .chip.selected {
-      background: var(--mdc-theme-primary, #6200ee);
+      background: var(--mdc-theme-primary, #03a9f4);
       color: white;
+      box-shadow: 0 2px 6px rgba(3, 169, 244, 0.4);
     }
     .search-section-title {
-      padding: 12px 16px 4px 16px;
-      font-size: 0.8em;
-      color: gray;
+      padding: 16px 16px 8px 16px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--mdc-theme-primary, #03a9f4);
       text-transform: uppercase;
-      letter-spacing: 1px;
+      letter-spacing: 1.2px;
+      background: #fafafa;
+      border-bottom: 1px solid #eee;
     }
     .unit-grid {
       display: grid;
@@ -197,10 +215,10 @@ export class HomeView extends LitElement {
             ${this.searchResults.boxes.length > 0 ? html`
               <div class="search-section-title">Boxes</div>
               ${this.searchResults.boxes.map(box => html`
-                <mwc-list-item twoline graphic="icon" @click=${() => this._navigateToBox(box.id)}>
+                <mwc-list-item twoline graphic="icon" @click=${() => this._navigateToBox(box.id)} style="margin: 4px 8px; border-radius: 8px; overflow: hidden; --mdc-list-item-graphic-margin: 16px;">
                   <span>${box.name}</span>
                   <span slot="secondary">${box.items ? box.items.length : 0} items ${box.description ? `• ${box.description}` : ''}</span>
-                  <mwc-icon slot="graphic">inventory_2</mwc-icon>
+                  <mwc-icon slot="graphic" style="color: var(--mdc-theme-primary, #03a9f4); font-size: 32px; background: #e3f2fd; border-radius: 8px; display: flex; align-items: center; justify-content: center; width: 48px; height: 48px;">inventory_2</mwc-icon>
                 </mwc-list-item>
               `)}
             ` : ''}
@@ -208,18 +226,22 @@ export class HomeView extends LitElement {
             ${this.searchResults.items.length > 0 ? html`
               <div class="search-section-title">Items</div>
               ${this.searchResults.items.map(item => html`
-                <mwc-list-item twoline graphic="medium" @click=${(e) => this._openItemDetail(e, item)}>
+                <mwc-list-item twoline graphic="medium" @click=${(e) => this._openItemDetail(e, item)} style="margin: 4px 8px; border-radius: 8px; overflow: hidden; --mdc-list-item-graphic-margin: 16px;">
                   <span>${item.name}</span>
                   <span slot="secondary">In Box: ${item.box ? item.box.name : 'Unknown'} • Qty: ${item.quantity} ${item.category ? `• [${item.category}]` : ''}</span>
                   ${item.photo_path
-        ? html`<img slot="graphic" src="${window.AppRouter ? window.AppRouter.urlForPath(item.photo_path) : item.photo_path}" style="width: 56px; height: 56px; object-fit: cover; border-radius: 4px;" />`
-        : html`<mwc-icon slot="graphic">category</mwc-icon>`}
+        ? html`<img slot="graphic" src="${window.AppRouter ? window.AppRouter.urlForPath(item.photo_path) : item.photo_path}" style="width: 48px; height: 48px; object-fit: cover; border-radius: 8px; border: 1px solid #eee; box-shadow: 0 1px 3px rgba(0,0,0,0.1);" />`
+        : html`<mwc-icon slot="graphic" style="color: gray; font-size: 32px; background: #f5f5f5; border-radius: 8px; display: flex; align-items: center; justify-content: center; width: 48px; height: 48px;">category</mwc-icon>`}
                 </mwc-list-item>
               `)}
             ` : ''}
 
             ${(this.searchResults.boxes.length === 0 && this.searchResults.items.length === 0) ? html`
-              <mwc-list-item noninteractive>No results found for "${this.searchQuery}"</mwc-list-item>
+              <div style="padding: 32px 16px; text-align: center; color: #757575; display: flex; flex-direction: column; align-items: center;">
+                <mwc-icon style="font-size: 48px; color: #e0e0e0; margin-bottom: 8px;">search_off</mwc-icon>
+                <div style="font-size: 1rem; font-weight: 500; color: #424242;">No results found</div>
+                <div style="font-size: 0.875rem; margin-top: 4px;">Try adjusting your search query or category filter</div>
+              </div>
             ` : ''}
           </mwc-list>
         </div>
